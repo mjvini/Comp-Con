@@ -14,6 +14,24 @@ int vet[TAM_VET];
 int vetor[NTHREADS];
 int parte =0; //Determina a parte do vetor a ser executada
 
+//verifica todos os elementos do vetor. 
+void verifica (int *vet){
+//se cont = 0, todos os elementos estão ok! Ou seja, iguais a 4. 
+    int cont = 0;    
+    for(int i=0; i<TAM_VET;i++){
+        if(vet[i] != 4){
+     //       printf("Erro: Vetor não foi preenchido corretamente!!");
+    //        return 0;
+              cont++;
+        }         
+    }
+    if(cont==0){
+        printf("Tudo certo!\n");
+    }else{
+        printf("Algo deu errado!\n");    
+    }
+}
+
 //Função que a thread irá executar
 void * tarefa (void * arg){
     int ident = * (int *) arg;
@@ -45,7 +63,7 @@ int main(void) {
         //cont++;
     }
     //printa um valor qualquer o vetor antes de ser elevado ao quadrado.
-    printf("valor qualquer do vetor antes. vet[4999] = %d\n", vet[4999]);
+    //printf("valor qualquer do vetor antes. vet[4999] = %d\n", vet[4999]);
 
     pthread_t tid[NTHREADS]; //identificador da thread no sistema
     int ident[NTHREADS]; //identificador local da thread
@@ -62,7 +80,10 @@ int main(void) {
        if (pthread_join(tid[i], NULL)) 
           printf("ERRO -- pthread_join\n");
     }
+
+    verifica(vet);
+    
     //printa um valor qualquer o vetor depois de ser elevado ao quadrado.
-    printf("valor qualquer do vetor depois. vet[3000] = %d\n", vet[3000]);
+    //printf("valor qualquer do vetor depois. vet[3000] = %d\n", vet[3000]);
 
 }
