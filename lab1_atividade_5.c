@@ -1,6 +1,6 @@
 // Disciplina: Computacao Concorrente 
-// Aluno: Marcus Vinícius Torres de Oliveira 
-// DRE: 118142223 
+// Aluno: Marcus Vinícius Torres de Oliveira e Filipe Trajlezer Junqueira dos Santos
+// DRE: 118142223 e 117247224
 // Módulo 1 - Laboratório: 1 
 // Atividade 5
 
@@ -12,7 +12,6 @@
 #define TAM_VET 10000
 int vet[TAM_VET];
 int vetor[NTHREADS];
-int parte =0; //Determina a parte do vetor a ser executada
 
 //verifica todos os elementos do vetor. 
 void verifica (int *vet){
@@ -20,8 +19,6 @@ void verifica (int *vet){
     int cont = 0;    
     for(int i=0; i<TAM_VET;i++){
         if(vet[i] != 4){
-     //       printf("Erro: Vetor não foi preenchido corretamente!!");
-    //        return 0;
               cont++;
         }         
     }
@@ -37,7 +34,7 @@ void * tarefa (void * arg){
     int ident = * (int *) arg;
     vetor[ident-1] = ident;
 
-    int thread_parte = parte++;
+    int thread_parte = ident - 1;
     //Executa a parte do vetor de acordo com a thread.
     for(int i = thread_parte * (TAM_VET/2);
      i < (thread_parte + 1) * (TAM_VET/2); i++){
@@ -56,14 +53,11 @@ int main(void) {
     //vou preencher o vetor com todos os elementos = 2.
     //Desse forma, espera-se que as threas elevem eles
     //ao quadrado para 4.
-    //int vet[TAM_VET];
-    //int cont = 0; //Verifica o total de elementos preenchidos
+
     for(int i=0; i<TAM_VET; i++){
         vet[i] = 2; 
-        //cont++;
     }
-    //printa um valor qualquer o vetor antes de ser elevado ao quadrado.
-    //printf("valor qualquer do vetor antes. vet[4999] = %d\n", vet[4999]);
+
 
     pthread_t tid[NTHREADS]; //identificador da thread no sistema
     int ident[NTHREADS]; //identificador local da thread
@@ -81,9 +75,8 @@ int main(void) {
           printf("ERRO -- pthread_join\n");
     }
 
+    //funcao para testar se o vetor está preenchido corretamente com os elementos ao quadrado
     verifica(vet);
     
-    //printa um valor qualquer o vetor depois de ser elevado ao quadrado.
-    //printf("valor qualquer do vetor depois. vet[3000] = %d\n", vet[3000]);
 
 }
