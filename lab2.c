@@ -45,7 +45,7 @@ void matrizSeq(int dim){
             }
         }
     }
-    
+    /*
     printf("matriz saída seq: \n");
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
@@ -53,7 +53,7 @@ void matrizSeq(int dim){
         }
         puts("");
     } 
-       
+    */       
 
 }
 //Inicializa as matrizes de entrada e saída
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]){
    GET_TIME(fim);
    tempoMatConc = fim - inicio;
     //printa a matriz concorrente de saída
-    
+   /* 
    printf("matriz saída conc: \n");
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
@@ -157,7 +157,7 @@ int main(int argc, char* argv[]){
         }
         puts("");
     }
-    
+    */
    //Verifica se as matrizes de saída são iguais
     verificaResMatSaida(dim);    
 
