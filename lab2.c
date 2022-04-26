@@ -10,7 +10,7 @@
 #include "timer.h"
 
 float *mat1; //1° matriz de entrada
-float *mat2; //2° matriz de entrada
+//float *mat2; //2° matriz de entrada **Obs.: Alocação de mem desnecessária
 float *mat_saida_seq; //matriz de saída sequencial
 float *mat_saida_conc; //matriz de saída não sequencial
 int nthreads; //número de threads
@@ -30,7 +30,7 @@ void * tarefa(void *arg){
         for(int j=0; j<args->dim; j++){
             for(int k=0; k<args->dim; k++){
                 mat_saida_conc[i*(args->dim)+j] += 
-                    mat1[i*(args->dim)+j] * mat2[j];
+                    mat1[i*(args->dim)+j] * mat1[j];
             }
         }
     }
@@ -41,7 +41,7 @@ void matrizSeq(int dim){
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
             for(int k=0; k<dim; k++){
-                mat_saida_seq[i*dim+j] += mat1[i*dim+j] * mat2[i*dim+j];
+                mat_saida_seq[i*dim+j] += mat1[i*dim+j] * mat1[i*dim+j];
             }
         }
     }
@@ -61,7 +61,7 @@ void inicializarMat(int dim){
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
             mat1[i*dim+j] = 1;
-            mat2[i*dim+j] = 1;
+            //mat2[i*dim+j] = 2;
             mat_saida_seq[i*dim+j] = 0;
             mat_saida_conc[i*dim+j] = 0;
         }
@@ -106,8 +106,8 @@ int main(int argc, char* argv[]){
    //alocacao de memoria para as estruturas de dados
    mat1 = (float *) malloc(sizeof(float) * dim * dim);
    if (mat1 == NULL) {printf("ERRO--malloc\n"); return 2;}
-   mat2 = (float *) malloc(sizeof(float) * dim * dim);
-   if (mat2 == NULL) {printf("ERRO--malloc\n"); return 2;}
+   //mat2 = (float *) malloc(sizeof(float) * dim * dim);
+   //if (mat2 == NULL) {printf("ERRO--malloc\n"); return 2;}
    mat_saida_seq = (float *) malloc(sizeof(float) * dim * dim);
    if (mat_saida_seq == NULL) {printf("ERRO--malloc\n"); return 2;}
    mat_saida_conc = (float *) malloc(sizeof(float) * dim * dim);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]){
 
    //liberação da memória
    free(mat1);
-   free(mat2);
+   //free(mat2);
    free(mat_saida_seq);
    free(mat_saida_conc);
    free(args);
