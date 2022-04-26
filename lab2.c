@@ -1,12 +1,9 @@
 // Disciplina: Computacao Concorrente 
 // Aluno: Marcus Vinícius Torres de Oliveira
-// DRE: 118142223
-// Módulo 1 - Laboratório: 2 
+#include<stdio.h>
+#include<stdlib.h>i*dim + j
 // Atividade 1
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<pthread.h>
 #include "timer.h"
 
 float *mat1; //1° matriz de entrada
@@ -73,7 +70,7 @@ void verificaResMatSaida(int dim){
     int boolean = 0;
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
-            if(mat_saida_conc[i] != mat_saida_seq[i]){
+            if(mat_saida_conc[i*dim + j] != mat_saida_seq[i*dim + j]){
                 printf("ERRO no resultado das matrizes!\n");
                 boolean = 1;
                 break;
