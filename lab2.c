@@ -1,9 +1,12 @@
 // Disciplina: Computacao Concorrente 
 // Aluno: Marcus Vinícius Torres de Oliveira
-#include<stdio.h>
-#include<stdlib.h>i*dim + j
+// DRE: 118142223
+// Módulo 1 - Laboratório: 2 
 // Atividade 1
 
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
 #include "timer.h"
 
 float *mat1; //1° matriz de entrada
@@ -27,7 +30,7 @@ void * tarefa(void *arg){
         for(int j=0; j<args->dim; j++){
             for(int k=0; k<args->dim; k++){
                 mat_saida_conc[i*(args->dim)+j] += 
-                    mat1[i*(args->dim)+j] * mat1[j];
+                    mat1[i*(args->dim)+k] * mat1[k*(args->dim)+j];
             }
         }
     }
@@ -38,11 +41,11 @@ void matrizSeq(int dim){
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
             for(int k=0; k<dim; k++){
-                mat_saida_seq[i*dim+j] += mat1[i*dim+j] * mat1[i*dim+j];
+                mat_saida_seq[i*dim+j] += mat1[i*dim+k] * mat1[k*dim+j];
             }
         }
     }
-    /*
+    
     printf("matriz saída seq: \n");
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
@@ -50,7 +53,7 @@ void matrizSeq(int dim){
         }
         puts("");
     } 
-    */   
+       
 
 }
 //Inicializa as matrizes de entrada e saída
@@ -70,7 +73,7 @@ void verificaResMatSaida(int dim){
     int boolean = 0;
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
-            if(mat_saida_conc[i*dim + j] != mat_saida_seq[i*dim + j]){
+            if(mat_saida_conc[i*dim + j] != mat_saida_seq[i*dim+j]){
                 printf("ERRO no resultado das matrizes!\n");
                 boolean = 1;
                 break;
@@ -146,7 +149,7 @@ int main(int argc, char* argv[]){
    GET_TIME(fim);
    tempoMatConc = fim - inicio;
     //printa a matriz concorrente de saída
-    /*
+    
    printf("matriz saída conc: \n");
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
@@ -154,7 +157,7 @@ int main(int argc, char* argv[]){
         }
         puts("");
     }
-    */
+    
    //Verifica se as matrizes de saída são iguais
     verificaResMatSaida(dim);    
 
