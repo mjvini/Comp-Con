@@ -53,14 +53,15 @@ void matrizSeq(int dim){
         }
         puts("");
     } 
-    */       
+      */     
 
 }
+
 //Inicializa as matrizes de entrada e saída
 void inicializarMat(int dim){
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
-            srand(time(NULL));
+            //srand(time(NULL));
             int num_random = rand() % 1000; //gera um número random entre 0 e 999
             mat1[i*dim+j] = num_random;
             //mat2[i*dim+j] = 2;
@@ -116,7 +117,8 @@ int main(int argc, char* argv[]){
    if (mat_saida_conc == NULL) {printf("ERRO--malloc\n"); return 2;}
 
 
-    //inicialização das matrizes
+    //inicialização das matrizes com números random
+    srand(time(NULL));
     inicializarMat(dim);
 
     //Pega o tempo da função sequencial de mult das matrizes
@@ -159,7 +161,7 @@ int main(int argc, char* argv[]){
         }
         puts("");
     }
-    */   
+     */
    //Verifica se as matrizes de saída são iguais
     verificaResMatSaida(dim);    
 
