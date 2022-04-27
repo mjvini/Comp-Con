@@ -60,7 +60,9 @@ void matrizSeq(int dim){
 void inicializarMat(int dim){
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
-            mat1[i*dim+j] = 1;
+            srand(time(NULL));
+            int num_random = rand() % 1000; //gera um número random entre 0 e 999
+            mat1[i*dim+j] = num_random;
             //mat2[i*dim+j] = 2;
             mat_saida_seq[i*dim+j] = 0;
             mat_saida_conc[i*dim+j] = 0;
@@ -149,7 +151,7 @@ int main(int argc, char* argv[]){
    GET_TIME(fim);
    tempoMatConc = fim - inicio;
     //printa a matriz concorrente de saída
-   /* 
+   /*
    printf("matriz saída conc: \n");
     for(int i=0; i<dim;i++){
         for(int j=0; j<dim; j++){
@@ -157,7 +159,7 @@ int main(int argc, char* argv[]){
         }
         puts("");
     }
-    */
+    */   
    //Verifica se as matrizes de saída são iguais
     verificaResMatSaida(dim);    
 
