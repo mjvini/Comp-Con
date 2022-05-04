@@ -1,5 +1,6 @@
 # Comp-Con
 Salvar os Labs de Comp. Con. da faculdade
+Visualize o arq clicando em "display the source blob"
 N       Threads  Tempo Sequencial     Tempo Concorrente    Aceleração
 10^5       1       0.000536s              0.003084s         0.173776s
 10^5       2       0.000584s              0.001497s         0.390262s
