@@ -15,12 +15,13 @@ double *vetor; //vetor de entrada com dimensao dim
 
 //Inicializa o vetor com números random
 void inicializa_vet(int dim){
-    srand(time(NULL));
+    //srand(time(NULL));
     
-    for(int i=0; i<dim;i++){
-        float num_random = rand() / 1000000; //gera um número random 
-        vetor[i] = num_random;
+    for(int i=1; i<dim+1;i++){
+        double num_random = (rand() / 1000000.7)*i; //gera um número random 
+        vetor[i - 1] = num_random;
     }
+    //printa os elementos do vetor
     /*
     for(int i=0; i<dim; i++){
         printf("vet[%d] = %.2f\n", i, vetor[i]);
@@ -107,6 +108,7 @@ int main(int argc, char *argv[]) {
       return 2;
    }
    //preenche o vetor de entrada com número random
+   srand(time(NULL));
    inicializa_vet(dim);
    
    //Pega o tempo da forma sequencial
