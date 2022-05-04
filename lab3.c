@@ -15,14 +15,13 @@ double *vetor; //vetor de entrada com dimensao dim
 
 //Inicializa o vetor com números random
 void inicializa_vet(int dim){
-    float randMax = 3500000;
     srand(time(NULL));
     
     for(int i=0; i<dim;i++){
-        float a = 1.0;
-        float num_random = ((float)rand() / randMax) * a; //gera um número random entre 0 e 999
+        float num_random = rand() / 1000000; //gera um número random 
         vetor[i] = num_random;
-    }/*
+    }
+    /*
     for(int i=0; i<dim; i++){
         printf("vet[%d] = %.2f\n", i, vetor[i]);
     }
@@ -30,7 +29,7 @@ void inicializa_vet(int dim){
 }
 
 //Achar menor e maior elemento do vetor de forma sequencial
-void acharMenorMaiorElemento(int dim){
+void acharMenorMaiorElementoSeq(int dim){
     double menor = vetor[0], maior = vetor[0];
     for(int i=0; i<dim; i++){
         if (menor > vetor[i]) {
@@ -41,7 +40,7 @@ void acharMenorMaiorElemento(int dim){
             maior = vetor[i];        
         }
     }
-    printf("menor = %.2f e maior = %.2f \n", menor, maior);
+    printf("menorSeq = %.2f e maiorSeq = %.2f \n", menor, maior);
 }
 
 typedef struct {
@@ -52,30 +51,46 @@ typedef struct {
 void * tarefa(void * arg) {
     tArgs *args = (tArgs*) arg;
     int ident = args->id;
-    
-    vetor[ident-1] = ident;
 
-    int thread_parte = ident - 1;
+    int thread_parte = ident;
     //Executa a parte do vetor de acordo com a thread.
-    for(int i = thread_parte * (TAM_VET/2); i < (thread_parte + 1) * (TAM_VET/2); i++){
-     if (args->menor > vetor[i]) {
+    for(int i = thread_parte * (dim/nthreads); i < (thread_parte + 1) * (dim/nthreads); i++){
+        if (args->menor > vetor[i]) {
             args->menor = vetor[i];
+            //printf("Entrou no if menor\n");
         }
         if (args->maior < vetor[i]) {
-            args->maior = vetor[i];        
+            args->maior = vetor[i];
+            //printf("Entrou no if maior\n");        
          }
     }
-    printf("A thread %d está fazendo a parte %d do vetor \n",
-    ident, thread_parte);
+    //printf("A thread %d está fazendo a parte %d do vetor \n", ident, thread_parte);
 
     
     pthread_exit(NULL); 
 }
 
+void retornaMenorMaiorConc(void * arg){
+    tArgs *args = (tArgs*) arg;
+    double menorConc = (args+0)->menor, maiorConc = (args+0)->maior;
+    for(int i=0; i<nthreads; i++){
+        if((args+i)->menor < menorConc){
+            menorConc = (args+i)->menor;
+            //printf("A thread %d entrou no menor\n", i);  
+        }
+        if((args+i)->maior > maiorConc){
+            maiorConc = (args+i)->maior;
+            //printf("A thread %d entrou no maior\n", i);
+        }
+    }
+    printf("menorConc = %.2f e maiorConc = %.2f \n", menorConc, maiorConc);
+}
+
 //fluxo principal
 int main(int argc, char *argv[]) {
-   double ini, fim; //tomada de tempo
+   double ini, fim, tempoConc, tempoSeq; //tomada de tempo
    pthread_t *tid; //identificadores das threads no sistema
+   tArgs *args; //identificadores locais das threads e dimensão
    double *retorno; //valor de retorno das threads
 
    //recebe e valida os parametros de entrada (dimensao do vetor, numero de threads)
@@ -94,26 +109,38 @@ int main(int argc, char *argv[]) {
    //preenche o vetor de entrada com número random
    inicializa_vet(dim);
    
+   //Pega o tempo da forma sequencial
+   GET_TIME(ini);
    //Achar menor e maior elemento de forma sequencial
-   acharMenorMaiorElemento(dim);
+   acharMenorMaiorElementoSeq(dim);
+   GET_TIME(fim);
+   tempoSeq = fim-ini;
+   printf("Tempo sequencial:  %lf\n", tempoSeq);
 
-   //soma concorrente dos elementos
+
+
+   //Achar o maior e o menor elemento de forma concorrente
+   //Pegar o tempo da forma concorrente
    GET_TIME(ini);
    tid = (pthread_t *) malloc(sizeof(pthread_t) * nthreads);
    if(tid==NULL) {
       fprintf(stderr, "ERRO--malloc\n");
       return 2;
    }
+   args = (tArgs*) malloc(sizeof(tArgs)*nthreads);
+   if(args==NULL) {puts("ERRO--malloc"); return 2;}
+
    //criar as threads
-   for(long int i=0; i<nthreads; i++) {
+   for(int i=0; i<nthreads; i++) {
       (args+i)->id = i;
-      (args+i)->menor;
-      (args+i)->maior;
+      (args+i)->menor = 10000000000000000; //Cria as threads com um valor default 
+      (args+i)->maior = 0;
       if(pthread_create(tid+i, NULL, tarefa, (void*) (args+i))){
          fprintf(stderr, "ERRO--pthread_create\n");
          return 3;
       }
    }
+
    //aguardar o termino das threads
    for(long int i=0; i<nthreads; i++) {
       if(pthread_join(*(tid+i), (void**) &retorno)){
@@ -123,11 +150,16 @@ int main(int argc, char *argv[]) {
       
    }
    GET_TIME(fim);
-   printf("Tempo concorrente:  %lf\n", fim-ini);
+   tempoConc = fim-ini;
+   //Pega o maior e o menor elemento pelas threads de forma sequencial
+   retornaMenorMaiorConc((void*) args);
 
+   printf("Tempo concorrente:  %lf\n", tempoConc);
+   printf("Ganho de tempo: %lf (TempoSeq/ TempoConc)\n", (tempoSeq/tempoConc));
 
    //libera as areas de memoria alocadas
    free(vetor);
+   free(args);
    free(tid);
 
    return 0;
