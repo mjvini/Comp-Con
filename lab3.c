@@ -51,9 +51,11 @@ typedef struct {
 
 void * tarefa(void * arg) {
     tArgs *args = (tArgs*) arg;
-    int ident = args->id;
-
-    int thread_parte = ident;
+    //int ident = args->id;
+    //Inicializa a thread com o primeiro elemento do vetor só para comparar com os demais
+    args->menor = vetor[0]; 
+    args->maior = vetor[0];
+    int thread_parte = args->id;
     //Executa a parte do vetor de acordo com a thread.
     for(int i = thread_parte * (dim/nthreads); i < (thread_parte + 1) * (dim/nthreads); i++){
         if (args->menor > vetor[i]) {
@@ -121,9 +123,7 @@ int main(int argc, char *argv[]) {
 
 
 
-   //Achar o maior e o menor elemento de forma concorrente
-   //Pegar o tempo da forma concorrente
-   GET_TIME(ini);
+
    tid = (pthread_t *) malloc(sizeof(pthread_t) * nthreads);
    if(tid==NULL) {
       fprintf(stderr, "ERRO--malloc\n");
@@ -132,11 +132,14 @@ int main(int argc, char *argv[]) {
    args = (tArgs*) malloc(sizeof(tArgs)*nthreads);
    if(args==NULL) {puts("ERRO--malloc"); return 2;}
 
+   //Achar o maior e o menor elemento de forma concorrente
+   //Pegar o tempo da forma concorrente
+   GET_TIME(ini);
    //criar as threads
    for(int i=0; i<nthreads; i++) {
       (args+i)->id = i;
-      (args+i)->menor = 10000000000000000; //Cria as threads com um valor default 
-      (args+i)->maior = 0;
+      //(args+i)->menor = 10000000000000000; //Cria as threads com um valor default 
+      //(args+i)->maior = 0;
       if(pthread_create(tid+i, NULL, tarefa, (void*) (args+i))){
          fprintf(stderr, "ERRO--pthread_create\n");
          return 3;
