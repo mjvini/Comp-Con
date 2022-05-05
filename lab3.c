@@ -9,13 +9,12 @@
 #include<pthread.h>
 #include "timer.h"
 
-long int dim;  //dimensao do vetor de entrada
+long long int dim;  //dimensao do vetor de entrada
 int nthreads;  //numero de threads
 double *vetor; //vetor de entrada com dimensao dim 
 
 //Inicializa o vetor com números random
 void inicializa_vet(int dim){
-    //srand(time(NULL));
     
     for(int i=1; i<dim+1;i++){
         double num_random = (rand() / 1000000.7)*i; //gera um número random 
@@ -45,28 +44,37 @@ void acharMenorMaiorElementoSeq(int dim){
 }
 
 typedef struct {
-    int id;  //identificador do elemento que a thread vai processar
+    long int id;  //identificador do elemento que a thread vai processar
+    //long int dim; //dimensão das estruturas de entrada
     double menor, maior; //Maior e menor elemento que a thread achou na parte do vetor dela
 } tArgs;
 
 void * tarefa(void * arg) {
     tArgs *args = (tArgs*) arg;
-    //int ident = args->id;
-    //Inicializa a thread com o primeiro elemento do vetor só para comparar com os demais
-    args->menor = vetor[0]; 
-    args->maior = vetor[0];
-    int thread_parte = args->id;
+    long int id = args->id; //identificador da thread 
+    double menorLocal = 1000000000000; //Variável local do menor valor
+    double maiorLocal = 0; //Variável local do maior valor
+    long int tamBloco = dim/nthreads; //Tamanho do bloco de cada thread
+    long int inicio = id * tamBloco; //Elemento inicial de cada thread
+    long int fim; //elemento final(nao processado) do bloco da thread
+    if(id == nthreads-1) fim = dim;
+    else fim = inicio + tamBloco; //trata o resto se houver
+ 
     //Executa a parte do vetor de acordo com a thread.
-    for(int i = thread_parte * (dim/nthreads); i < (thread_parte + 1) * (dim/nthreads); i++){
-        if (args->menor > vetor[i]) {
-            args->menor = vetor[i];
+    for(long int i=inicio; i<fim; i++){
+        if (menorLocal > vetor[i]) {
+            menorLocal = vetor[i];
             //printf("Entrou no if menor\n");
         }
-        if (args->maior < vetor[i]) {
-            args->maior = vetor[i];
+        if (maiorLocal < vetor[i]) {
+            maiorLocal = vetor[i];
             //printf("Entrou no if maior\n");        
          }
     }
+
+    args->menor = menorLocal;
+    args->maior = maiorLocal;
+
     //printf("A thread %d está fazendo a parte %d do vetor \n", ident, thread_parte);
 
     
@@ -103,6 +111,7 @@ int main(int argc, char *argv[]) {
    }
    dim = atoll(argv[1]); //converte a str para long long int
    nthreads = atoi(argv[2]);
+
    //aloca o vetor de entrada
    vetor = (double*) malloc(sizeof(double)*dim);
    if(vetor == NULL) {
@@ -121,9 +130,9 @@ int main(int argc, char *argv[]) {
    tempoSeq = fim-ini;
    printf("Tempo sequencial:  %lf\n", tempoSeq);
 
-
-
-
+   //Achar o maior e o menor elemento de forma concorrente
+   //Pegar o tempo da forma concorrente
+   GET_TIME(ini);
    tid = (pthread_t *) malloc(sizeof(pthread_t) * nthreads);
    if(tid==NULL) {
       fprintf(stderr, "ERRO--malloc\n");
@@ -132,12 +141,11 @@ int main(int argc, char *argv[]) {
    args = (tArgs*) malloc(sizeof(tArgs)*nthreads);
    if(args==NULL) {puts("ERRO--malloc"); return 2;}
 
-   //Achar o maior e o menor elemento de forma concorrente
-   //Pegar o tempo da forma concorrente
-   GET_TIME(ini);
+   
    //criar as threads
    for(int i=0; i<nthreads; i++) {
       (args+i)->id = i;
+      //(args+i)->dim = dim;
       //(args+i)->menor = 10000000000000000; //Cria as threads com um valor default 
       //(args+i)->maior = 0;
       if(pthread_create(tid+i, NULL, tarefa, (void*) (args+i))){
