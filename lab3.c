@@ -84,7 +84,7 @@ void * tarefa(void * arg) {
 void retornaMenorMaiorConc(void * arg){
     tArgs *args = (tArgs*) arg;
     double menorConc = (args+0)->menor, maiorConc = (args+0)->maior;
-    for(int i=0; i<nthreads; i++){
+    for(int i=1; i<nthreads; i++){
         if((args+i)->menor < menorConc){
             menorConc = (args+i)->menor;
             //printf("A thread %d entrou no menor\n", i);  
