@@ -5,11 +5,12 @@
 #include <math.h>
 #include "timer.h"
 
-int nthreads, *vetor;
+int nthreads, *vetorEntrada, i_global;
+double *vetorSaida, *vetorSaidaConc;
 long long int dim; 
 
 
-
+//checa se é primo
 int ehprimo (long long int n){
     if (n<=1) return 0;
     if (n==2) return 1;
@@ -18,7 +19,7 @@ int ehprimo (long long int n){
         if(n%i ==0) return 0;
     return 1; //Se retornar 1 é primo
 }
-
+//Inicializa o vetor com números aleatorios 
 void inicializarVetor(int dim){
     for(int i=0; i<dim; i++){
         int num_rand = rand() / 1000;
@@ -26,11 +27,20 @@ void inicializarVetor(int dim){
     }
 }
 
+void processaPrimos(int vetorEntrada[], float vetorSaida[], int dim) {
+    for(int i=0; i<dim, i++) {
+        if (ehPrimo(vetorEntrada[i])
+            vetorSaida[i] = sqrt(vetorEntrada[i]);
+        else
+            vetorSaida[i] = vetorEntrada[i];
+    }
+}
+
 void *tarefa (void * arg){
     int ident = * (int *) arg;
     vetor[ident] = ident; //Identificador da thread
 
-
+    
 
 }
 
@@ -70,7 +80,10 @@ int main(int argc, char *argv[]) {
     //Criar as threads
     for(int =0; i<nthreads; i++){
         ident[i] = i;
-        if(pthread_create(&tid[i], NULL, tarefa, (void *) &ident[i]))
+        if(pthread_create(&tid[i], NULL, tarefa, (void *) &ident[i])){
+            fprintf(stderr, "ERRO--pthread_create\n");
+            return 3;        
+        }
     }    
 
  
