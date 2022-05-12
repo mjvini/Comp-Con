@@ -4,6 +4,7 @@
 // Módulo 1 - Laboratório: 4 
 // Atividade 1
 
+
 #include <stdio.h>
 #include <stdlib.h> 
 #include <pthread.h>
@@ -91,7 +92,7 @@ void *tarefa (void * arg){
 
 int main(int argc, char *argv[]) {
      pthread_t *tid;
-     double ini, fim;
+     double ini, fim, tempoConc, tempoSeq;
 
     //recebe e valida os parametros de entrada (dimensao do vetor, numero de threads)
     if(argc < 3) {
@@ -127,8 +128,9 @@ int main(int argc, char *argv[]) {
     GET_TIME(ini);
     processaPrimos(vetorEntrada,vetorSaida,dim);
     GET_TIME(fim);
+    tempoSeq = fim - ini;
     //Printa o tempo sequencial
-    printf("Tempo sequencial: %lf\n", fim - ini);
+    printf("Tempo sequencial: %lf\n", tempoSeq);
     //printaVet(vetorSaida, vetorEntrada ,dim);
 
     //Aloca tid
@@ -160,7 +162,9 @@ int main(int argc, char *argv[]) {
           printf("ERRO -- pthread_join\n");
     }
     GET_TIME(fim);
-    printf("Tempo Concorrente: %lf\n", fim - ini);
+    tempoConc = fim - ini;
+    printf("Tempo Concorrente: %lf\n", tempoConc);
+    printf("Tempo ganho (tempoSeq/tempoConc): %lf\n", tempoSeq/tempoConc);
     pthread_mutex_destroy(&mutex);
     //Compara os valores dos vetores de saída.
     //Se todos os valores estiverem iguais, printa tudo ok!
