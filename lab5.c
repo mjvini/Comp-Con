@@ -1,8 +1,8 @@
 // Disciplina: Computacao Concorrente 
 // Aluno: Marcus Vinícius Torres de Oliveira
 // DRE: 118142223
-// Módulo 1 - Laboratório: 5 
-// Atividade 1
+// Módulo 2 - Laboratório: 5 
+// Atividade 4
 
 
 #include <stdio.h>
