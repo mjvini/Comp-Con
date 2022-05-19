@@ -17,14 +17,6 @@ pthread_mutex_t mutex;
 pthread_cond_t cond_cond;
 int x = 0;
 
-const char* escolheFrase(){
-    srand(time(NULL));
-    int randomNum;
-    const char* y[] = {"Fique a vontade.", "Sente-se por favor.", "Aceita um copo d'água?."};
-    randomNum = (rand()%3);
-    return y[randomNum];
-}
-
 void * tarefa1(void *arg){
     
     pthread_mutex_lock(&mutex);
