@@ -11,37 +11,44 @@
 #include <pthread.h>
 #include<unistd.h>
 
-#define L 4 //numero de threads leitoras
-#define E 2 //numero de threads escritoras
-
-//funcao barreira
-void barreira(int nthreads) {
-    pthread_mutex_lock(&mutex); //inicio secao critica
-    if (bloqueadas == (nthreads-1)) { 
-      //ultima thread a chegar na barreira
-      pthread_cond_broadcast(&x_cond);
-      bloqueadas=0;
-    } else {
-      bloqueadas++;
-      pthread_cond_wait(&x_cond, &mutex);
-    }
-    pthread_mutex_unlock(&mutex); //fim secao critica
-}
+#define L 10 //numero de threads leitoras
+#define E 1 //numero de threads escritoras
 
 //variaveis do problema
 int leit=0; //contador de threads lendo
 int escr=0; //contador de threads escrevendo
-int bloqueadas = 0;
+int quer_escr = 0; //Contador de threads que querem escrever e estão bloqueadas
 
 //variaveis para sincronizacao
 pthread_mutex_t mutex;
 pthread_cond_t cond_leit, cond_escr;
 
+
 //entrada leitura
 void InicLeit (int id) {
    pthread_mutex_lock(&mutex);
    printf("L[%d] quer ler\n", id);
-   while(escr > 0) {
+   //Bloqueia as threads de leitura caso tenha alguma thread de escrita escrevendo ou 
+   //tentando escrever.
+   /*
+    L[1] quer ler
+    L[2] quer ler
+    Leitora 1 esta lendo
+    E[1] quer escrever
+    E[1] bloqueou       //Bloqueou, pois já tinha uma thread de leitura lendo
+    Leitora 2 esta lendo //Leu primeiro, pois ela já tinha passado da condição (escr > 0 || quer_escr > 0 ) 
+                        //antes da thread de escrita implementar a variável que_escr
+    L[4] quer ler //Perceba que a thread de leitura quer ler, mas a thread de escrita quer escrever
+    L[4] bloqueou //Por isso, ela foi bloqueada. Se não fosse o caso, ela leria primeiro, mas ela entrou na condição. 
+    L[1] terminou de ler
+    L[2] terminou de ler
+    E[1] desbloqueou //Asssim que a thread de escrita foi desbloqueada, ela já ganhou a prioridade, mesmo tendo uma thread de leitura
+                    //Querendo ler também.  
+    Escritora 1 esta escrevendo
+    E[1] terminou de escrever
+    L[4] desbloqueou
+   */
+   while(escr > 0 || quer_escr > 0 ) {
      printf("L[%d] bloqueou\n", id);
      pthread_cond_wait(&cond_leit, &mutex);
      printf("L[%d] desbloqueou\n", id);
@@ -65,8 +72,10 @@ void InicEscr (int id) {
    printf("E[%d] quer escrever\n", id);
    while((leit>0) || (escr>0)) {
      printf("E[%d] bloqueou\n", id);
+     quer_escr++;
      pthread_cond_wait(&cond_escr, &mutex);
      printf("E[%d] desbloqueou\n", id);
+     quer_escr--;
    }
    escr++;
    pthread_mutex_unlock(&mutex);
@@ -78,7 +87,10 @@ void FimEscr (int id) {
    printf("E[%d] terminou de escrever\n", id);
    escr--;
    pthread_cond_signal(&cond_escr);
-   pthread_cond_broadcast(&cond_leit);
+   if(escr == 0 && quer_escr == 0){
+     pthread_cond_broadcast(&cond_leit); //Libera todas as threads de leitura, só quando não tem mais nenhuma thread de escrita
+                                        //escrevendou ou tentando escrever.
+   }
    pthread_mutex_unlock(&mutex);
 }
 
