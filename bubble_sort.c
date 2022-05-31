@@ -3,6 +3,12 @@
 #include <pthread.h>
 #include "timer.h"
 
+//Número de threads
+#define NTHREADS  5
+
+//Tamanho dos vetores
+int dim =10;
+
 //Vetores
 int *vetorSeq;
 int *vetorConc;
@@ -22,25 +28,37 @@ void inicializarVetor(int dim){
 //Bubble sort sequencial
 void bubble_sort_sequencial(int dim){
     int aux = 0;
+    int swapped; //Break o for se não ocorrer swap.
     for (int i = 0; i < dim - 1; i++){
+        swapped = 0; //False
         for(int j = 0; j < dim - i - 1; j++){
             //Swap
             if(vetorSeq[j] > vetorSeq[j+1]){
-            aux = vetorSeq[j];
-            vetorSeq[j] = vetorSeq[j+1];
-            vetorSeq[j+1] = aux;
+                aux = vetorSeq[j];
+                vetorSeq[j] = vetorSeq[j+1];
+                vetorSeq[j+1] = aux;
+                swapped = 1; //True
             }
+        }
+        if(swapped == 0){
+            break;
         }
     }
 }
 
-int *list (int * list){
+void *tarefa(void *arg){
+    int ident = * (int *) arg;
+    int tamBloco = dim/NTHREADS //Tamanho do bloco de cada thread
+    
 
+    pthread_exit(NULL);
 }
 
 int main(){
-    //Tamanho dos vetores
-    int dim =10;
+    
+    //Identificador da thread no sistema
+    pthread_t tid[NTHREADS];
+    
     
     //Aloca os vetores
     vetorSeq = (int*) malloc(sizeof(int)*dim);
@@ -52,6 +70,17 @@ int main(){
     if(vetorConc == NULL) {
        fprintf(stderr, "ERRO--malloc\n");
        return 1;
+    }
+
+    pthread_t tid[NTHREADS]; //Identificador da thread no sistema
+    int ident[NTHREADS]; //Identificador local da thread
+    
+    //Cria as threads 
+    for(int i=0; i<NTHREADS; i++) {
+       ident[i] = i;
+       if (pthread_create(&tid[i], NULL,
+        tarefa, (void *)&ident[i])) 
+          printf("ERRO -- pthread_create\n");
     }
 
     //Preenche o vetor
