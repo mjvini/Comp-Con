@@ -16,7 +16,7 @@ public class EncontrarPar {
 
 
 
-    //Construtor. Passa o contPar, o número de threads e o vetor
+    //Construtor. Passa o tamanho do vetor, o número de threads e o vetor
     public EncontrarPar(int tamanhoVetor,int nThreads, int[] vetor){
         this.tamanhoVetor = tamanhoVetor;
         this.nThreads = nThreads;
