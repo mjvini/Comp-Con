@@ -72,7 +72,7 @@ class TContaPar {
 
     //Número de threads
     static final int N = 4;
-    static final int TAMANHO_VETOR = 100;
+    static final int TAMANHO_VETOR = 100; //Tamanho do vetor
 
     public static void main(String[] args) {
 
