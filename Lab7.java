@@ -9,7 +9,7 @@ import java.util.Random;
 //Class da estrutura de dados (recurso) compartilhado entre as threads
 public class EncontrarPar {
 
-    private int tamanhoVetor;
+    private int tamanhoVetor; //Tamanho do vetor
     private int contPar = 0; //Contador de números pares
     private int nThreads; //Número de threads
     private int[] vetor; //Vetor
