@@ -10,8 +10,8 @@
 
 #define NTHREADS  5
 
-int x = 0;
-sem_t sem1, sem2;
+int x = 0; //Variável global
+sem_t sem1, sem2; // semaforos para exclusao mutua entre as threads
 
 void * tarefa1(void *arg){
 
@@ -71,7 +71,8 @@ int main(){
     
     pthread_t tid[NTHREADS]; //identificador da thread no sistema
 
-
+    //Inicia o semaforo
+    //Inicia com 0, pois assim garante que a T5 será a primeira a executar, já que ela não tem wait, só post
     sem_init(&sem1, 0, 0);
     sem_init(&sem2, 0, 0);
      
