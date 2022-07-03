@@ -18,6 +18,7 @@ int aux=0;
 
 //Variáveis para sincronização
 pthread_mutex_t mutex; //variavel de lock para exclusao mutua
+pthread_cond_t cond_cond;
 
 //Inicializa o vetor com números aleatorios de 0 até 999
 void inicializarVetor(int dim){
@@ -37,6 +38,22 @@ int maiorElemento(int dim){
         }
     }
     return maiorElemento;
+}
+
+//Verifica se o vetorSeq é igual ao vetorConc
+void verificaSeVetoresIguais(int *vetor1, int *vetor2, int dim){
+    int iguais = 0; //True
+    for(int i = 0; i < dim; i++){
+        if(vetor1[i] != vetor2[i]){
+            iguais++; //False
+            break;
+        }
+    }
+    if(iguais != 0){
+        printf("Os vetores são diferentes!\n");
+    }else{
+        printf("Tudo certo! Os vetores são iguais!\n");    
+    }
 }
 
 //Bubble sort sequencial
@@ -60,6 +77,33 @@ void bubbleSortSequencial(int *vetor){
     }
 }
 
+//Bubble sort concorrente
+void bubbleSortConc(int *vetor, int tamanho){
+    int aux = 0;
+    int swapped; //Break o for se não ocorrer swap.
+    for (int i = 0; i < tamanho - 1; i++){
+        swapped = 0; //False
+        for(int j = 0; j < tamanho - i - 1; j++){
+            //Swap
+            if(vetor[j] > vetor[j+1]){
+                aux = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = aux;
+                swapped = 1; //True
+            }
+        }
+        if(swapped == 0){
+            break;
+        }
+    }
+}
+
+void printaVetor(int *vetor, int dim){
+    for(int i = 0; i < dim; i++){
+        printf("Vetor[%d]: %d\n", i, vetor[i]);
+    }
+}
+
 //void *maxElemento(void *arg);
 
 void criaSublistas(int maiorNumero, int tamanhoLista, int nThreads) {
@@ -69,15 +113,15 @@ void criaSublistas(int maiorNumero, int tamanhoLista, int nThreads) {
     for (int i = 0; i < nThreads; i++) {                            // 2     / 4      / 6      / 10
                                                                     // 0     / 3      / 5      / 7
         if(i == 0){
-            coeficienteInicial = 0;
+            coeficienteInicial = -1; //Para não excluir o número 0
         }else{
-            coeficienteInicial = temp + 1;
+            coeficienteInicial = temp; //problema com o + 1, vou tirar
         }
         
         if(i + 1 == nThreads){                              
             coeficienteFinal = maiorNumero;    
         }else{
-            coeficienteFinal = (coeficiente) * (i + 1);
+            coeficienteFinal = maiorNumero/ (nThreads - i);
         }
         temp = coeficienteFinal; //Pega o coefFinal anterior
                                                        
@@ -97,27 +141,41 @@ void criaSublistas(int maiorNumero, int tamanhoLista, int nThreads) {
 };
 
 void *tarefa(void *arg){
-    int ident = * (int *) arg;
-    pthread_mutex_lock(&mutex);
-    if(ident==x){
-        pthread_mutex_unlock(&mutex);
-        int tamanho = sublistaIndex[ident]; //Pega o tamanho da sublista
-        bubbleSortSequencial(sublistas[ident]); //Pensar em como pegar a sublista para usar no bubble_sort método
-        int inicio = aux; //Elemento inicial de sublista
-        int fim = tamanho; //Elemento final de cada sublista
-    //    pthread_mutex_lock(&mutex);
-    //if(ident==x){
-        for(int i=inicio; i<fim; i++){
-            int j = 0;
-            vetorConc[i] = sublistas[ident][j];
-            j++;
-        }
-        aux = tamanho;
-        x++;
+    int ident = * (int *) arg; //Identificador das threads
+    
+    int tamanho = sublistaIndex[ident]; //Pega o tamanho da sublista
+
+    //Faz o bubble_sort da sublista se ela possuir mais de 1 elemento
+    if(tamanho > 1){
+        bubbleSortConc(sublistas[ident], tamanho); 
     }
+    
+    //bubbleSortConc(sublistas[ident], tamanho); //Faz o bubble_sort da sublista
+
+    pthread_mutex_lock(&mutex);
+    while(ident>x){ //Garante que as threads respeitem a ordem para o vetorConc ser preenchido corretamente
+        pthread_cond_wait(&cond_cond, &mutex); 
+    }
+
+    if(tamanho != 0){ //Evita threads que não tem nenhum elemento em sua sublista
+        int inicio = aux; //Elemento inicial de sublista
+        int fim = inicio + tamanho; //Elemento final de cada sublista
+        int j = 0;
+        for(int i=inicio; i<fim; i++){
+            int temp = sublistas[ident][j];
+            vetorConc[i] = temp;
+            j++;
+            aux++;
+        }
         
+    }
+    x++;
+    
+    pthread_cond_broadcast(&cond_cond);    
+    pthread_mutex_unlock(&mutex);    
 
     pthread_exit(NULL);
+    
 }
 
 int main(int argc, char *argv[]) {
@@ -149,6 +207,8 @@ int main(int argc, char *argv[]) {
     }
     
     //Aloca as sublistas
+    //o nthreads é o número de linhas da matriz
+    //dim é o número de colunas.
     sublistas = (int**) malloc(sizeof(int*) * nthreads);
     for(int i=0; i<nthreads; i++){
         sublistas[i] = (int *) malloc (dim * sizeof(int));
@@ -171,45 +231,95 @@ int main(int argc, char *argv[]) {
        return 1;
     }
     
+    //Preenche o vetor
+    srand(time(NULL));
+    inicializarVetor(dim);
+
+    /*
+    printaVetor(vetorConc, dim);
+    puts("----------------------------------");
+    */
+    int maiorNum = maiorElemento(dim);
+    printf("MaiorNUM: %d\n", maiorNum);
+    puts("----------------------------------\n");    
+    
     //--inicilaiza o mutex (lock de exclusao mutua)
     pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init (&cond_cond, NULL);
+
+    //Cria as sublistas
+    criaSublistas(maiorNum, dim, nthreads);
+
+    //Prints de test
+    /*
+    for(int i=0; i<nthreads;i++){
+        int tamanho = sublistaIndex[i];
+        printf("tamanho: %d\n", tamanho);
+        for(int j=0; j< tamanho;j++ ){
+            printf("sublista[%d][%d]: %d\n", i, j,sublistas[i][j]);
+        }
+    }
+    puts("---------------------------------------------\n");
+    
+    int tamanho = sublistaIndex[0];
+    printf("tamanho: %d\n", tamanho);
+    bubbleSortConc(sublistas[0], tamanho);
+
+    for(int i=0; i<nthreads;i++){
+        int tamanho = sublistaIndex[i];
+        for(int j=0; j< tamanho;j++ ){
+            printf("sublista[%d][%d]: %d\n", i, j,sublistas[i][j]);
+        }
+    }
+    */
+    
+    //Pega o tempo da forma concorrente
+    GET_TIME(ini);    
 
     //Criar as threads
     int ident[nthreads]; //Identificador local da thread
     for(int i=0; i<nthreads; i++){
+        ident[i] = i;
         if(pthread_create(&tid[i], NULL, tarefa, (void *)&ident[i])){
             fprintf(stderr, "ERRO--pthread_create\n");
             return 3;        
         }
     }
+    
 
-    //Preenche o vetor
-    srand(time(NULL));
-    inicializarVetor(dim);
-
-    int maiorNum = maiorElemento(dim);
-
-    //Cria as sublistas
-    criaSublistas(maiorNum, dim, nthreads);
-
-    //Printa o vetor
-    for(int i = 0; i < dim; i++){
-        printf("Vetor[%d] = %d\n", i, vetorConc[i]);
-    }
-    puts("--------------------------------------");
-
-    //Chama o Bubble Sort sequencial 
-    bubbleSortSequencial(vetorConc);
-
-
-    for(int i = 0; i < dim; i++){
-        printf("Vetor[%d] = %d\n", i, vetorConc[i]);
+    //espera as threads terminarem 
+    for(int i=0; i<nthreads; i++) {
+       if (pthread_join(tid[i], NULL)) 
+          printf("ERRO -- pthread_join\n");
     }
 
+    GET_TIME(fim);
+    tempoConc = fim-ini;
+    
+    //Chama o Bubble Sort
+    //Pega o tempo da forma sequencial
+    GET_TIME(ini);
+    bubbleSortSequencial(vetorSeq);
+    GET_TIME(fim);
+    tempoSeq = fim-ini;
+    printf("Tempo sequencial:  %lf\n", tempoSeq);
 
+    printf("Tempo concorrente:  %lf\n", tempoConc);
 
+    
+    //printaVetor(vetorSeq, dim);
+    puts("----------------------------------\n");
+    //printaVetor(vetorConc, dim);
+    //printf("ultimo elemento do vetorConc: %d", vetorConc[999]);
+    
+    //Verifica se os vetores são iguais
+    //Se eles são iguais, "printa" que está tudo certo
+    //Caso contrário, "printa" que eles são diferentes 
+    verificaSeVetoresIguais(vetorSeq, vetorConc, dim);
+    
     /* Desaloca variaveis e termina */
     pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond_cond);
 
     //Libera o malloc
     free(vetorSeq);
