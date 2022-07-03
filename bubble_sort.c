@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
 
     //Prints de desempenho
     printf("Tempo sequencial:  %lf\n", tempoSeq);
-    printf("Tempo concorrente:  %lf\n", (tempoConc+tempoMaiorNum+tempoSublistas));
+    printf("Tempo concorrente:  %lf\n", tempoConc);
     printf("Tempo de criação das sublistas:  %lf\n", tempoSublistas);
     printf("Tempo de achar o maior elemento:  %lf\n", tempoMaiorNum);
     printf("Ganho de desempenho: %lf\n", (tempoSeq/tempoConc));
