@@ -59,6 +59,27 @@ void verificaSeVetoresIguais(int *vetor1, int *vetor2, int dim){
     }
 }
 
+//Verifica se o vetor está ordenado
+void verificaSeOVetorEstaOrdenado(int *vetor1, int dim){
+    int ordenado = 0; //True. Verifica se está seguindo uma ordem crescente de ordenação.
+    for(int i = 0; i < dim; i++){
+        //Evita fazer uma comparação fora do vetor1
+        if(i + 1 == dim){
+            break;
+        }
+        //O vetor anterior (vetor1[i]) só pode ser menor ou igual ao vetor sucessor (vetor1[i+1])
+        if(vetor1[i] > vetor1[i+1]){
+            ordenado++; //False
+            break;
+        }
+    }
+    if(ordenado != 0){
+        printf("Vetor não está ordenado!\n");
+    }else{
+        printf("Vetor está ordenado!\n");
+    }
+}
+
 //Bubble sort sequencial
 void bubbleSortSequencial(int *vetor){
     int aux = 0;
@@ -289,9 +310,10 @@ int main(int argc, char *argv[]) {
     printf("Ganho de desempenho: %lf\n", (tempoSeq/tempoConc));
     puts("----------------------------------\n");
 
+    //Verifica se o vetor está ordenado de forma crescente.
+    verificaSeOVetorEstaOrdenado(vetorConc, dim);
+
     //Verifica se os vetores são iguais.
-    //Se eles são iguais "printa" que está tudo certo.
-    //Caso contrário, "printa" que eles são diferentes. 
     verificaSeVetoresIguais(vetorSeq, vetorConc, dim);
     
     //Destrói o mutex e a condição
