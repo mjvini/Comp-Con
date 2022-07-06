@@ -25,11 +25,11 @@ void * tarefa2(void *arg){
     sem_wait(&sem1);
     printf("Fique a vontade. \n");
     x++;
-    sem_post(&sem1);
+    //sem_post(&sem1);
     //Só libera a última thread (T1) quando todas as 4 já tiverem imprimido.
     if(x==3){
         sem_post(&sem2); //Cada uma precisa do post, pois a ordem de quem vai ser a 4º a printar é aleatória
-    }
+    }else sem_post(&sem1);
     pthread_exit(NULL);
 }
 
@@ -38,11 +38,11 @@ void * tarefa3(void *arg){
     sem_wait(&sem1);
     printf("Sente-se por favor. \n");
     x++;
-    sem_post(&sem1);
+    //sem_post(&sem1);
     //Só libera a última thread (T1) quando todas as 4 já tiverem imprimido.
     if(x==3){
         sem_post(&sem2); //Cada uma precisa do post, pois a ordem de quem vai ser a 4º a printar é aleatória
-    }
+    }else sem_post(&sem1);
     pthread_exit(NULL);
 }
 
@@ -51,11 +51,11 @@ void * tarefa4(void *arg){
     sem_wait(&sem1);
     printf("Aceita um copo d'água?. \n");
     x++;
-    sem_post(&sem1);
+    //sem_post(&sem1);
     //Só libera a última thread (T1) quando todas as 4 já tiverem imprimido.
     if(x==3){
         sem_post(&sem2); //Cada uma precisa do post, pois a ordem de quem vai ser a 4º a printar é aleatória
-    }
+    }else sem_post(&sem1);
     pthread_exit(NULL);
 }
 
