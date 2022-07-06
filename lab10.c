@@ -3,13 +3,6 @@
 // DRE: 118142223
 // Módulo 3 - Laboratório: 10
 
-/*
-Ativida 1:
-a) Os valores iniciais dos semáforos(em_e, em_l, escr, leit)
-devem ser 1.
-
-b) 
-*/
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
