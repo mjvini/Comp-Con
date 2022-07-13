@@ -11,8 +11,8 @@
 #include <pthread.h>
 #include<unistd.h>
 
-#define L 10 //numero de threads leitoras
-#define E 1 //numero de threads escritoras
+#define L 4 //numero de threads leitoras
+#define E 3 //numero de threads escritoras
 
 //variaveis do problema
 int leit=0; //contador de threads lendo
