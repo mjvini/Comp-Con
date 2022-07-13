@@ -30,24 +30,6 @@ void InicLeit (int id) {
    printf("L[%d] quer ler\n", id);
    //Bloqueia as threads de leitura caso tenha alguma thread de escrita escrevendo ou 
    //tentando escrever.
-   /*
-    L[1] quer ler
-    L[2] quer ler
-    Leitora 1 esta lendo
-    E[1] quer escrever
-    E[1] bloqueou       //Bloqueou, pois já tinha uma thread de leitura lendo
-    Leitora 2 esta lendo //Leu primeiro, pois ela já tinha passado da condição (escr > 0 || quer_escr > 0 ) 
-                        //antes da thread de escrita implementar a variável que_escr
-    L[4] quer ler //Perceba que a thread de leitura quer ler, mas a thread de escrita quer escrever
-    L[4] bloqueou //Por isso, ela foi bloqueada. Se não fosse o caso, ela leria primeiro, mas ela entrou na condição. 
-    L[1] terminou de ler
-    L[2] terminou de ler
-    E[1] desbloqueou //Asssim que a thread de escrita foi desbloqueada, ela já ganhou a prioridade, mesmo tendo uma thread de leitura
-                    //Querendo ler também.  
-    Escritora 1 esta escrevendo
-    E[1] terminou de escrever
-    L[4] desbloqueou
-   */
    while(escr > 0 || quer_escr > 0 ) {
      printf("L[%d] bloqueou\n", id);
      pthread_cond_wait(&cond_leit, &mutex);
@@ -75,9 +57,9 @@ void InicEscr (int id) {
      quer_escr++;
      pthread_cond_wait(&cond_escr, &mutex);
      printf("E[%d] desbloqueou\n", id);
-     quer_escr--;
    }
    escr++;
+   quer_escr--;
    pthread_mutex_unlock(&mutex);
 }
 
